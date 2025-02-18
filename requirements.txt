@@ -1,2 +1,3 @@
-websocket-client
+asyncio
+aiohttp
 python-dotenv

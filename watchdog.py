@@ -16,9 +16,14 @@ async def subscribe_to_messages(websocket: ClientWebSocketResponse) -> None:
         if isinstance(message, WSMessage):
             if message.type == WSMsgType.text:
                 message_json = message.json()
-                if message_json.get('action') == 'chat_message' and not message_json.get('success'):
-                    print(f'>>>{message_json["user"]}: {message_json["message"]}')
-                logger.info('> Message from server received: %s', message_json)
+                if message_json.get('type') == 'auth_required':
+                    logger.info('> Auth request from server received: %s', message_json)
+                    homeassistant_token = os.getenv("HOME_ASSISTANT_WEBSOCKET_TOKEN")
+                    await websocket.send_json({'type': 'auth', 'access_token': homeassistant_token})
+                elif message_json.get('type') == 'auth_ok':
+                    logger.info('> Auth success from server received: %s', message_json)
+                else:
+                    logger.info('> Message from server received: %s', message_json)
 
 async def handler() -> None:
 
@@ -36,6 +41,11 @@ async def handler() -> None:
                 [read_message_task], #ping_task, send_input_message_task], 
                 return_when=asyncio.FIRST_COMPLETED,
             )
+
+            logger.info(ws.close_code)
+
+            if ws.close_code == 1006:
+                logger.info('> Abnormal disconnect from server')
 
             # First, we want to close the websocket connection if it's not closed by some other function above
             if not ws.closed:

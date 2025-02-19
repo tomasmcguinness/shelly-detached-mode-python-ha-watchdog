@@ -2,7 +2,8 @@ from dotenv import load_dotenv
 from aiohttp import ClientSession, ClientWebSocketResponse
 from aiohttp.http_websocket import WSMessage
 from aiohttp.web import WSMsgType
-from safeguard import initiate_safeguard
+from failsafe import initiate_failsafe
+from restore import initiate_restore
 import logging
 import os
 import asyncio
@@ -23,7 +24,7 @@ async def subscribe_to_messages(websocket: ClientWebSocketResponse) -> None:
                     await websocket.send_json({'type': 'auth', 'access_token': homeassistant_token})
                 elif message_json.get('type') == 'auth_ok':
                     logger.info('> Auth success from server received: %s', message_json)
-                    #await restore_behaviour()
+                    await restore_behaviour()
                 else:
                     logger.info('> Message from server received: %s', message_json)
 
@@ -60,7 +61,7 @@ async def handler() -> None:
                         logger.info('> Abnormal disconnect from server')
 
                     logger.info('Initiating Safeguard...')
-                    
+
                     await initiate_safeguard()
 
                     # First, we want to close the websocket connection if it's not closed by some other function above

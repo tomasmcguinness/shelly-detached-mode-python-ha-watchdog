@@ -22,7 +22,7 @@ def on_service_state_change(zeroconf: Zeroconf, service_type: str, name: str, st
                 addresses = [f"{addr}:{cast(int, info.port)}" for addr in info.parsed_scoped_addresses()]
                 discovered_devices.append(Shelly(name, addresses[0]))
 
-async def restore_detached() -> None:
+async def initiate_restore() -> None:
 
     with open('setup.json') as f:
         data = json.load(f)

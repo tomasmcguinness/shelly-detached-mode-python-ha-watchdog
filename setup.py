@@ -1,7 +1,5 @@
 from zeroconf import ServiceBrowser, ServiceStateChange, Zeroconf
 from aiohttp import ClientSession
-from typing import cast
-from shelly import Shelly
 import time
 import logging
 import asyncio
@@ -15,19 +13,10 @@ failsave_active = False
 discovered_devices = []
 
 def on_service_state_change(zeroconf: Zeroconf, service_type: str, name: str, state_change: ServiceStateChange) -> None:
-    print(f"Service {name} of type {service_type} state changed: {state_change}")
-
     if state_change is ServiceStateChange.Added:
-        info = zeroconf.get_service_info(service_type, name)
-
         if name.startswith("shelly1"):
-            print("Found a Shelly1")
-
-            if info:
-                addresses = [f"{addr}:{cast(int, info.port)}" for addr in info.parsed_scoped_addresses()]
-                print(f"  Addresses: {', '.join(addresses)}")
-
-                discovered_devices.append(Shelly(name, addresses[0]))
+            logger.info("Found a Shelly1")
+            discovered_devices.append(name)
 
 async def process() -> None:
 
@@ -48,7 +37,7 @@ async def process() -> None:
                         btn_type = data["btn_type"]
 
                         if btn_type == 'detached':
-                            logger.info(f'Shelly1 {device.name} is in detached mode')
+                            logger.info(f'Shelly1 {device.name} is in detached mode. Adding to setup.json')
                             shellys_holder.append(device.name)
                             
                 except Exception as e:
@@ -57,7 +46,7 @@ async def process() -> None:
         json.dump(shellys, f)
         f.close()
 
-        logger.info('Setup is complete. setup.json contains a list of all Shelly1 relays in detached mode!')
+        logger.info('Setup is complete. The setup.json contains a list of all Shelly1 relays in detached mode. You can now run failsafe.py or start watchdog.py.')
 
 if __name__ == '__main__':
 

@@ -42,12 +42,10 @@ async def process() -> None:
         async with ClientSession() as session:
             for device in discovered_devices:
                 try:
-                    async with session.get(f'http://{device.address}/settings') as resp:
+                    async with session.get(f'http://{device.address}/settings/relay/0') as resp:
                         logger.info(f'Connected to {device.name}: {resp.status}')
                         data = await resp.json()
-                        relay = data["relays"][0]
-                        ison = relay["ison"]
-                        btn_type = relay["btn_type"]
+                        btn_type = data["btn_type"]
 
                         if btn_type == 'detached':
                             logger.info(f'Shelly1 {device.name} is in detached mode')

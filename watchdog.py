@@ -1,10 +1,8 @@
-from zeroconf import ServiceBrowser, ServiceStateChange, Zeroconf
 from dotenv import load_dotenv
 from aiohttp import ClientSession, ClientWebSocketResponse
 from aiohttp.http_websocket import WSMessage
 from aiohttp.web import WSMsgType
-from typing import cast
-import time
+from safeguard import initiate_safeguard
 import logging
 import os
 import asyncio
@@ -12,52 +10,7 @@ import asyncio
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger('client')
 
-failsave_active = False
-
-discovered_devices = []
-
-def on_service_state_change(zeroconf: Zeroconf, service_type: str, name: str, state_change: ServiceStateChange) -> None:
-    print(f"Service {name} of type {service_type} state changed: {state_change}")
-
-    if state_change is ServiceStateChange.Added:
-        info = zeroconf.get_service_info(service_type, name)
-        print(f"Info from zeroconf.get_service_info: {info!r}")
-
-        if name.startswith("shelly1"):
-            print("Found a Shelly1")
-
-
-            if info:
-                addresses = [f"{addr}:{cast(int, info.port)}" for addr in info.parsed_scoped_addresses()]
-                print(f"  Addresses: {', '.join(addresses)}")
-                discovered_devices.append(addresses[0])
-
-            # print(f"  Weight: {info.weight}, priority: {info.priority}")
-            # print(f"  Server: {info.server}")
-            # if info.properties:
-            #     print("  Properties are:")
-            #     for key, value in info.properties.items():
-            #         print(f"    {key!r}: {value!r}")
-            # else:
-            #     print("  No properties")
-
-            # Make an API request to the Shelly Device to check its version.
-            #
-
-            # async with aiohttp.ClientSession() as session:
-            #     async with session.get('http://httpbin.org/get') as resp:
-            #         print(resp.status)
-            #         print(await resp.text())
-
-        else:
-            print("  No info")
-     #   print("\n")
-
-async def initiate_failsafe() -> None:
-    logger.info('> Initiating failsafe')
-
-async def restore_behaviour() -> None:
-    logger.info('> Restore behaviour')
+safeguard_active = False
 
 async def subscribe_to_messages(websocket: ClientWebSocketResponse) -> None:
     async for message in websocket:
@@ -70,7 +23,7 @@ async def subscribe_to_messages(websocket: ClientWebSocketResponse) -> None:
                     await websocket.send_json({'type': 'auth', 'access_token': homeassistant_token})
                 elif message_json.get('type') == 'auth_ok':
                     logger.info('> Auth success from server received: %s', message_json)
-                    await restore_behaviour()
+                    #await restore_behaviour()
                 else:
                     logger.info('> Message from server received: %s', message_json)
 
@@ -106,7 +59,9 @@ async def handler() -> None:
                     if ws.close_code == 1006:
                         logger.info('> Abnormal disconnect from server')
 
-                    await initiate_failsafe()
+                    logger.info('Initiating Safeguard...')
+                    
+                    await initiate_safeguard()
 
                     # First, we want to close the websocket connection if it's not closed by some other function above
                     if not ws.closed:
@@ -121,20 +76,6 @@ async def handler() -> None:
 if __name__ == '__main__':
     load_dotenv()
 
-    # Using mDNS, find all Shelly devices on the network.
-    #
-    print(f'Scanning for Shelly devices for {30} seconds')
-
-    zeroconf = Zeroconf()
-
-    browser = ServiceBrowser(zeroconf, "_http._tcp.local.", handlers=[on_service_state_change])
-
-    # We will give the script 30 seconds to find all Shelly devices.
-    #
-    time.sleep(30)
-    
-    zeroconf.close()
-
-    print('Scanning is complete!')
+    print('Safeguard Watchdog is running!')
 
     asyncio.run(handler())

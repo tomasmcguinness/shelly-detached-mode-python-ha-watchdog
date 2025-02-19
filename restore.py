@@ -22,7 +22,7 @@ def on_service_state_change(zeroconf: Zeroconf, service_type: str, name: str, st
                 addresses = [f"{addr}:{cast(int, info.port)}" for addr in info.parsed_scoped_addresses()]
                 discovered_devices.append(Shelly(name, addresses[0]))
 
-async def initiate_failsafe() -> None:
+async def restore_detached() -> None:
 
     with open('setup.json') as f:
         data = json.load(f)
@@ -43,12 +43,12 @@ async def initiate_failsafe() -> None:
             for discovered_device in discovered_devices:
 
                 try:
-                    response = await session.post(url=f'http://{discovered_device.address}/settings/relay/0?btn_type=toggle')
+                    response = await session.post(url=f'http://{discovered_device.address}/settings/relay/0?btn_type=detached')
                     logger.info(response.status == 200)
                             
                 except Exception as e:
                     logger.error(e)
 
 if __name__ == "__main__":
-    asyncio.run(initiate_safeguard())
+    asyncio.run(restore_detached())
     

@@ -14,16 +14,24 @@ logger = logging.getLogger('client')
 
 failsave_active = False
 
+discovered_devices = []
+
 def on_service_state_change(zeroconf: Zeroconf, service_type: str, name: str, state_change: ServiceStateChange) -> None:
-    #print(f"Service {name} of type {service_type} state changed: {state_change}")
+    print(f"Service {name} of type {service_type} state changed: {state_change}")
 
     if state_change is ServiceStateChange.Added:
         info = zeroconf.get_service_info(service_type, name)
-        #print(f"Info from zeroconf.get_service_info: {info!r}")
+        print(f"Info from zeroconf.get_service_info: {info!r}")
 
-        if info:
-            addresses = [f"{addr}:{cast(int, info.port)}" for addr in info.parsed_scoped_addresses()]
-            print(f"  Addresses: {', '.join(addresses)}")
+        if name.startswith("shelly1"):
+            print("Found a Shelly1")
+
+
+            if info:
+                addresses = [f"{addr}:{cast(int, info.port)}" for addr in info.parsed_scoped_addresses()]
+                print(f"  Addresses: {', '.join(addresses)}")
+                discovered_devices.append(addresses[0])
+
             # print(f"  Weight: {info.weight}, priority: {info.priority}")
             # print(f"  Server: {info.server}")
             # if info.properties:
@@ -67,6 +75,8 @@ async def subscribe_to_messages(websocket: ClientWebSocketResponse) -> None:
                     logger.info('> Message from server received: %s', message_json)
 
 async def handler() -> None:
+
+    logger.info('> Connecting to Home Assistant')
 
     homeassistant_host = os.getenv("HOME_ASSISTANT_WEBSOCKET_HOST")
     homeassistant_port = os.getenv("HOME_ASSISTANT_WEBSOCKET_PORT")

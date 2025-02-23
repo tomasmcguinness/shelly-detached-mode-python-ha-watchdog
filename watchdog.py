@@ -9,7 +9,7 @@ import os
 import asyncio
 
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("client")
+logger = logging.getLogger("watchdog")
 
 safeguard_active = False
 

@@ -7,7 +7,7 @@ import json
 import logging
 
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("client")
+logger = logging.getLogger("failsafe")
 
 requested_device_names = []
 discovered_devices = []

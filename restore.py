@@ -7,7 +7,7 @@ import json
 import logging
 
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("client")
+logger = logging.getLogger("restore")
 
 requested_device_names = []
 discovered_devices = []
@@ -43,11 +43,15 @@ async def initiate_restore() -> None:
             for discovered_device in discovered_devices:
 
                 try:
+                    logger.info(f"> Setting btn_type to detached for [{discovered_device.name}]")
+
                     response = await session.post(url=f"http://{discovered_device.address}/settings/relay/0?btn_type=detached")
-                    logger.info(response.status == 200)
+                    logger.info(f"> Status: {response.status == 200}")
+
+                    logger.info(f"> Setting relay on for [{discovered_device.name}]")
 
                     response = await session.post(url=f"http://{discovered_device.address}/relay/0?turn=on")
-                    logger.info(response.status == 200)
+                    logger.info(f"> Status: {response.status == 200}")
                             
                 except Exception as e:
                     logger.error(e)

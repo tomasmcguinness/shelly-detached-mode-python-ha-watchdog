@@ -50,5 +50,5 @@ async def initiate_failsafe() -> None:
                     logger.error(e)
 
 if __name__ == "__main__":
-    asyncio.run(initiate_safeguard())
+    asyncio.run(initiate_failsafe())
     

@@ -1,7 +1,7 @@
 from zeroconf import ServiceBrowser, ServiceStateChange, Zeroconf
 from typing import cast
-from shelly import Shelly
 from aiohttp import ClientSession
+from shelly import Shelly
 import asyncio
 import json
 import logging
@@ -45,10 +45,13 @@ async def initiate_restore() -> None:
                 try:
                     response = await session.post(url=f'http://{discovered_device.address}/settings/relay/0?btn_type=detached')
                     logger.info(response.status == 200)
+
+                    response = await session.post(url=f'http://{discovered_device.address}/relay/0?turn=on')
+                    logger.info(response.status == 200)
                             
                 except Exception as e:
                     logger.error(e)
 
 if __name__ == "__main__":
-    asyncio.run(restore_detached())
+    asyncio.run(initiate_restore())
     

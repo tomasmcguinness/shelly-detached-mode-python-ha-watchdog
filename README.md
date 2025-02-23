@@ -8,8 +8,8 @@ The danger with this approach is that a failure in NodeRED or HomeAssistant woul
 
 I call this the `Shelly Failsafe`.
 
-> [!NOTE]
-> This failsafe is only for Shelly1 Gen1 relays as they don't support their own scripts.
+> [!TIP]
+> This failsafe is intended for use with Gen1 Shelly1 relays as they don't support their own scripts, but it will work with any and all Shelly 1 devices.
 
 > [!NOTE]
 > The scripts assume the Shelly HTTP API has no authentication required.
@@ -81,5 +81,5 @@ use the HTTP API to update the relay configuration.
 
 ## restore.py
 
-This script essentially reverses the failsafe and will set the `btn_type` to `detached` for all the relays in the `setup.json` file. Like `failsafe.py`, this script is provided so you can test it and manually execute it.
+This script essentially reverses the failsafe and will set the `btn_type` to `detached` for all the relays in the `setup.json` file. It will also switch them back to "On" in case anyone turned one off. Like `failsafe.py`, this script is provided so you can test it and manually execute it.
 

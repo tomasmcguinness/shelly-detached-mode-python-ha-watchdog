@@ -21,8 +21,11 @@ def on_service_state_change(zeroconf: Zeroconf, service_type: str, name: str, st
             if info:
                 addresses = [f"{addr}:{cast(int, info.port)}" for addr in info.parsed_scoped_addresses()]
                 discovered_devices.append(Shelly(name, addresses[0]))
+                logger.info(f"> Shelly1 [{name}] resolved to {addresses[0]}!")            
 
 async def initiate_failsafe() -> None:
+
+    logger.info("> Resolving IP addresses for Shelly devices!")
 
     with open("setup.json") as f:
         data = json.load(f)
@@ -39,15 +42,20 @@ async def initiate_failsafe() -> None:
 
         await asyncio.sleep(30)
 
+        logger.info("> Updating btn_type to detached...")
+
         async with ClientSession() as session:  
             for discovered_device in discovered_devices:
 
                 try:
+                    logger.info(f"> Setting btn_type to detached for [{discovered_device.name}]")
                     response = await session.post(url=f"http://{discovered_device.address}/settings/relay/0?btn_type=toggle")
-                    logger.info(response.status == 200)
+                    logger.info(f"> Status: {response.status == 200}")
                             
                 except Exception as e:
                     logger.error(e)
+        
+        logger.info("> Finished updating btn_type to toggle")
 
 if __name__ == "__main__":
     asyncio.run(initiate_failsafe())

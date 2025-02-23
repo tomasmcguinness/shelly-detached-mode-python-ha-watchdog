@@ -21,8 +21,11 @@ def on_service_state_change(zeroconf: Zeroconf, service_type: str, name: str, st
             if info:
                 addresses = [f"{addr}:{cast(int, info.port)}" for addr in info.parsed_scoped_addresses()]
                 discovered_devices.append(Shelly(name, addresses[0]))
+                logger.info(f"> Shelly1 [{name}] resolved to [{addresses[0]}]")   
 
 async def initiate_restore() -> None:
+
+    logger.info("> Resolving IP addresses for Shelly devices!")
 
     with open("setup.json") as f:
         data = json.load(f)
@@ -56,6 +59,9 @@ async def initiate_restore() -> None:
                 except Exception as e:
                     logger.error(e)
 
+            logger.info("> Finished updating btn_type to detached and switching relays on")
+
 if __name__ == "__main__":
+    logger.info("> Restore has started...")
     asyncio.run(initiate_restore())
     

@@ -7,7 +7,7 @@ import json
 import logging
 
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger('client')
+logger = logging.getLogger("client")
 
 requested_device_names = []
 discovered_devices = []
@@ -24,7 +24,7 @@ def on_service_state_change(zeroconf: Zeroconf, service_type: str, name: str, st
 
 async def initiate_failsafe() -> None:
 
-    with open('setup.json') as f:
+    with open("setup.json") as f:
         data = json.load(f)
         f.close()
 
@@ -43,7 +43,7 @@ async def initiate_failsafe() -> None:
             for discovered_device in discovered_devices:
 
                 try:
-                    response = await session.post(url=f'http://{discovered_device.address}/settings/relay/0?btn_type=toggle')
+                    response = await session.post(url=f"http://{discovered_device.address}/settings/relay/0?btn_type=toggle")
                     logger.info(response.status == 200)
                             
                 except Exception as e:

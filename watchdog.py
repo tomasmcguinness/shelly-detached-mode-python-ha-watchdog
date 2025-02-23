@@ -9,7 +9,7 @@ import os
 import asyncio
 
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger('client')
+logger = logging.getLogger("client")
 
 safeguard_active = False
 
@@ -18,27 +18,27 @@ async def subscribe_to_messages(websocket: ClientWebSocketResponse) -> None:
         if isinstance(message, WSMessage):
             if message.type == WSMsgType.text:
                 message_json = message.json()
-                if message_json.get('type') == 'auth_required':
-                    logger.info('> Auth request from server received: %s', message_json)
+                if message_json.get("type") == "auth_required":
+                    logger.info("> Auth request from server received: %s", message_json)
                     homeassistant_token = os.getenv("HOME_ASSISTANT_WEBSOCKET_TOKEN")
-                    await websocket.send_json({'type': 'auth', 'access_token': homeassistant_token})
-                elif message_json.get('type') == 'auth_ok':
-                    logger.info('> Auth success from server received: %s', message_json)
+                    await websocket.send_json({"type": "auth", "access_token": homeassistant_token})
+                elif message_json.get("type") == "auth_ok":
+                    logger.info("> Auth success from server received: %s", message_json)
                     await initiate_restore()
                 else:
-                    logger.info('> Message from server received: %s', message_json)
+                    logger.info("> Message from server received: %s", message_json)
 
 async def handler() -> None:
 
-    logger.info('> Connecting to Home Assistant')
+    logger.info("> Connecting to Home Assistant")
 
     homeassistant_host = os.getenv("HOME_ASSISTANT_WEBSOCKET_HOST")
     homeassistant_port = os.getenv("HOME_ASSISTANT_WEBSOCKET_PORT")
 
-    url = 'ws://{}:{}/api/websocket'.format(homeassistant_host, homeassistant_port)
+    url = f"ws://{homeassistant_host}:{homeassistant_port}/api/websocket"
 
     while(True):
-        logger.info('> Connecting to Home Assistant')
+        logger.info("> Connecting to Home Assistant")
 
         try:
             async with ClientSession() as session:
@@ -58,9 +58,9 @@ async def handler() -> None:
                     logger.info(ws.close_code)
 
                     if ws.close_code == 1006:
-                        logger.info('> Abnormal disconnect from server')
+                        logger.info("> Abnormal disconnect from server")
 
-                    logger.info('Initiating Safeguard...')
+                    logger.info("Initiating Safeguard...")
 
                     await initiate_failsafe()
 
@@ -74,9 +74,9 @@ async def handler() -> None:
         except Exception as e:
             logger.error(e)
         
-if __name__ == '__main__':
+if __name__ == "__main__":
     load_dotenv()
 
-    print('Shelly Failsafe Watchdog is running!')
+    print("Shelly Failsafe Watchdog is running!")
 
     asyncio.run(handler())

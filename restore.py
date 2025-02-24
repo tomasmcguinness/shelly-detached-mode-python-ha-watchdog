@@ -42,6 +42,8 @@ async def initiate_restore() -> None:
 
         await asyncio.sleep(30)
 
+        zeroconf.close()
+
         async with ClientSession() as session:  
             for discovered_device in discovered_devices:
 

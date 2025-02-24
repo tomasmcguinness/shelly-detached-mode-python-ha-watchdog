@@ -42,6 +42,8 @@ async def initiate_failsafe() -> None:
 
         await asyncio.sleep(30)
 
+        zeroconf.close()
+
         logger.info("> Updating btn_type to detached...")
 
         async with ClientSession() as session:  

@@ -44,13 +44,13 @@ async def initiate_failsafe() -> None:
 
         zeroconf.close()
 
-        logger.info("> Updating btn_type to detached...")
+        logger.info("> Updating btn_type to toggle...")
 
         async with ClientSession() as session:  
             for discovered_device in discovered_devices:
 
                 try:
-                    logger.info(f"> Setting btn_type to detached for [{discovered_device.name}]")
+                    logger.info(f"> Setting btn_type to toggle for [{discovered_device.name}]")
                     response = await session.post(url=f"http://{discovered_device.address}/settings/relay/0?btn_type=toggle")
                     logger.info(f"> Status: {response.status == 200}")
                             
